@@ -10,6 +10,8 @@ export interface CompanyFactSlim {
   year: number;
   revenue: Json;
   employees: Json | null;
+  revenue_band_label: string | null;
+  employee_band_label: string | null;
 }
 
 interface DataCache {
@@ -36,7 +38,7 @@ export function DataCacheProvider({ children }: { children: React.ReactNode }) {
     async function load() {
       const [companiesRes, factsRes] = await Promise.all([
         supabase.from("companies").select("*").order("company_name_value"),
-        supabase.from("company_facts").select("id, company_id, year, revenue, employees"),
+        supabase.from("company_facts").select("id, company_id, year, revenue, employees, revenue_band_label, employee_band_label"),
       ]);
       if (cancelled) return;
       if (!companiesRes.error) setCompanies(companiesRes.data ?? []);

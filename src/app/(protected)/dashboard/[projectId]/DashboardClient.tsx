@@ -1,10 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { computePool } from "@/lib/benchmark/percentiles";
-import type { CompanyMetrics, FilterState, BenchmarkPool } from "@/lib/benchmark/types";
+import type { CompanyMetrics, FilterState, BenchmarkPool, PeerPanelCompany } from "@/lib/benchmark/types";
 import { BenchmarkSidebar, type BenchmarkScreenId } from "@/components/benchmark/BenchmarkSidebar";
 import { BenchmarkFilterBar } from "@/components/benchmark/BenchmarkFilterBar";
+import { PeerManagementPanel } from "@/components/benchmark/PeerManagementPanel";
 import { BoardSizeScreen } from "@/components/benchmark/BoardSizeScreen";
 import { IndependenceScreen } from "@/components/benchmark/IndependenceScreen";
 import { DiversityScreen } from "@/components/benchmark/DiversityScreen";
@@ -15,6 +17,8 @@ interface DashboardClientProps {
   focus: CompanyMetrics;
   peers: CompanyMetrics[];
   year: number;
+  projectId: string;
+  allCompanies: PeerPanelCompany[];
 }
 
 const INITIAL_FILTERS: FilterState = {
@@ -26,9 +30,16 @@ const INITIAL_FILTERS: FilterState = {
   empMax: null,
 };
 
-export function DashboardClient({ focus, peers, year }: DashboardClientProps) {
+export function DashboardClient({ focus, peers, year, projectId, allCompanies }: DashboardClientProps) {
+  const router = useRouter();
   const [active, setActive] = useState<BenchmarkScreenId>("1.1");
   const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
+  const [peerPanelOpen, setPeerPanelOpen] = useState(false);
+
+  function handlePeersSaved() {
+    setPeerPanelOpen(false);
+    router.refresh();
+  }
 
   const pool: BenchmarkPool = useMemo(() => {
     const computed = computePool(focus, peers, filters);
@@ -41,20 +52,6 @@ export function DashboardClient({ focus, peers, year }: DashboardClientProps) {
     };
   }, [focus, peers, filters]);
 
-  const capRange = useMemo(() => {
-    if (focus.marketCap == null) return null;
-    const lo = focus.marketCap * 0.3;
-    const hi = focus.marketCap * 3;
-    return { min: Math.round(lo), max: Math.round(hi) };
-  }, [focus]);
-
-  const empRange = useMemo(() => {
-    if (focus.employees == null) return null;
-    const lo = focus.employees * 0.3;
-    const hi = focus.employees * 3;
-    return { min: Math.round(lo), max: Math.round(hi) };
-  }, [focus]);
-
   return (
     <div className="flex flex-1 overflow-hidden">
       <BenchmarkSidebar active={active} onChange={setActive} />
@@ -64,12 +61,24 @@ export function DashboardClient({ focus, peers, year }: DashboardClientProps) {
           onChange={setFilters}
           focusCountry={focus.country}
           focusIndustry={focus.industry}
-          capRange={capRange}
-          empRange={empRange}
           poolCount={pool.filteredPeers.length}
           fallback={pool.fallback}
           year={year}
+          onEditPeers={() => setPeerPanelOpen((v) => !v)}
+          peerPanelOpen={peerPanelOpen}
         />
+
+        {peerPanelOpen && (
+          <PeerManagementPanel
+            projectId={projectId}
+            allCompanies={allCompanies}
+            currentPeerIds={peers.map((p) => p.companyId)}
+            focusSector={focus.industry}
+            year={year}
+            onSaved={handlePeersSaved}
+            onClose={() => setPeerPanelOpen(false)}
+          />
+        )}
         <main className="flex-1 overflow-y-auto p-6">
           {active === "1.1" && <BoardSizeScreen pool={pool} />}
           {active === "1.2" && <IndependenceScreen pool={pool} />}

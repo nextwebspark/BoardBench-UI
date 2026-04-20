@@ -1,5 +1,6 @@
 "use client";
 
+import { Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { FilterState } from "@/lib/benchmark/types";
 
@@ -8,84 +9,39 @@ interface BenchmarkFilterBarProps {
   onChange: (next: FilterState) => void;
   focusCountry: string | null;
   focusIndustry: string | null;
-  capRange: { min: number; max: number } | null;
-  empRange: { min: number; max: number } | null;
   poolCount: number;
   fallback: boolean;
   year: number;
-}
-
-function fmtCap(v: number) {
-  if (v >= 1000) return `${(v / 1000).toFixed(1)}T`;
-  return `${Math.round(v)}B`;
-}
-
-function fmtEmp(v: number) {
-  if (v >= 1000) return `${Math.round(v / 1000)}K`;
-  return `${v}`;
+  onEditPeers: () => void;
+  peerPanelOpen: boolean;
 }
 
 export function BenchmarkFilterBar({
-  filters,
-  onChange,
-  focusCountry,
-  focusIndustry,
-  capRange,
-  empRange,
   poolCount,
   fallback,
   year,
+  onEditPeers,
+  peerPanelOpen,
 }: BenchmarkFilterBarProps) {
-  function toggle<K extends keyof FilterState>(key: K, value: FilterState[K]) {
-    onChange({ ...filters, [key]: value });
-  }
-
   return (
     <div className="flex items-center gap-2 border-b bg-card px-6 py-2 text-xs overflow-x-auto">
       <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
         Benchmark
       </span>
       <StaticChip label={String(year)} />
-      {focusCountry && (
-        <ToggleChip
-          label={focusCountry}
-          on={filters.country}
-          onClick={() => toggle("country", !filters.country)}
-        />
-      )}
-      {focusIndustry && (
-        <ToggleChip
-          label={focusIndustry}
-          on={filters.industry}
-          onClick={() => toggle("industry", !filters.industry)}
-        />
-      )}
-      {capRange && (
-        <ToggleChip
-          label={`Mkt cap: ${fmtCap(capRange.min)}–${fmtCap(capRange.max)}`}
-          on={filters.capMin !== null}
-          onClick={() =>
-            onChange({
-              ...filters,
-              capMin: filters.capMin === null ? capRange.min : null,
-              capMax: filters.capMin === null ? capRange.max : null,
-            })
-          }
-        />
-      )}
-      {empRange && (
-        <ToggleChip
-          label={`Employees: ${fmtEmp(empRange.min)}–${fmtEmp(empRange.max)}`}
-          on={filters.empMin !== null}
-          onClick={() =>
-            onChange({
-              ...filters,
-              empMin: filters.empMin === null ? empRange.min : null,
-              empMax: filters.empMin === null ? empRange.max : null,
-            })
-          }
-        />
-      )}
+      <button
+        type="button"
+        onClick={onEditPeers}
+        className={cn(
+          "inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[11px] font-medium transition-colors cursor-pointer",
+          peerPanelOpen
+            ? "border-primary bg-primary text-primary-foreground"
+            : "border-border bg-muted text-foreground hover:bg-accent hover:border-primary/40"
+        )}
+      >
+        <Users className="h-3 w-3" />
+        {peerPanelOpen ? "Close peers" : "Edit peers"}
+      </button>
       <div className="ml-auto shrink-0 text-[11px] font-medium">
         {fallback ? (
           <span className="text-amber-600 dark:text-amber-400">
@@ -110,30 +66,5 @@ function StaticChip({ label }: { label: string }) {
     <span className="rounded-full border border-border bg-muted px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
       {label}
     </span>
-  );
-}
-
-function ToggleChip({
-  label,
-  on,
-  onClick,
-}: {
-  label: string;
-  on: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "rounded-full border px-2.5 py-0.5 text-[11px] font-medium transition-colors",
-        on
-          ? "border-primary/40 bg-primary/10 text-primary"
-          : "border-border bg-background text-muted-foreground hover:bg-muted"
-      )}
-    >
-      {label}
-    </button>
   );
 }
