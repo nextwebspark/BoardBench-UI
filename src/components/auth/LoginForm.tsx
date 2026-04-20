@@ -28,21 +28,21 @@ export function LoginForm() {
       } else {
         setError("Check your email to confirm your account.");
       }
+      setLoading(false);
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         setError(error.message);
+        setLoading(false);
       } else {
         router.push("/projects");
-        router.refresh();
+        // loading stays true; component unmounts on navigation
       }
     }
-
-    setLoading(false);
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input
