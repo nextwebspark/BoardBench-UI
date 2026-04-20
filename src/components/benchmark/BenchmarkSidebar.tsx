@@ -7,6 +7,7 @@ export type BenchmarkScreenId = "1.1" | "1.2" | "1.6" | "1.10" | "1.11";
 interface BenchmarkSidebarProps {
   active: BenchmarkScreenId;
   onChange: (id: BenchmarkScreenId) => void;
+  mobileOpen?: boolean;
 }
 
 const ITEMS: { id: BenchmarkScreenId; label: string }[] = [
@@ -17,9 +18,13 @@ const ITEMS: { id: BenchmarkScreenId; label: string }[] = [
   { id: "1.11", label: "Composition score" },
 ];
 
-export function BenchmarkSidebar({ active, onChange }: BenchmarkSidebarProps) {
+export function BenchmarkSidebar({ active, onChange, mobileOpen }: BenchmarkSidebarProps) {
   return (
-    <aside className="w-48 shrink-0 border-r bg-card">
+    <aside className={cn(
+      "fixed inset-y-0 left-0 z-40 w-56 border-r bg-card transition-transform duration-200",
+      mobileOpen ? "max-lg:translate-x-0" : "max-lg:-translate-x-full",
+      "lg:static lg:z-auto lg:w-48 lg:shrink-0 lg:translate-x-0 lg:transition-none"
+    )}>
       <div className="px-3 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
         Module 1 · Composition
       </div>

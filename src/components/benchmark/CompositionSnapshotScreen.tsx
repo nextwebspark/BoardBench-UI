@@ -82,7 +82,9 @@ export function CompositionSnapshotScreen({ pool }: { pool: BenchmarkPool }) {
             Cells coloured by percentile band · green = above P60 · blue = P35–P60 · red = below P35
           </p>
         </CardHeader>
-        <CardContent className="overflow-x-auto">
+        <p className="px-4 pb-2 text-[10px] text-muted-foreground sm:hidden">← Scroll to see all columns</p>
+        <CardContent className="overflow-x-auto p-0 sm:p-6">
+          <div className="min-w-[700px]">
           <Table>
             <TableHeader>
               <TableRow>
@@ -177,6 +179,7 @@ export function CompositionSnapshotScreen({ pool }: { pool: BenchmarkPool }) {
               })}
             </TableBody>
           </Table>
+          </div>
         </CardContent>
       </Card>
 

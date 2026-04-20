@@ -33,16 +33,16 @@ export function GapToMedianBars({
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2.5 mb-2">
-        <div className="w-40 shrink-0" />
+        <div className="w-24 shrink-0 sm:w-40" />
         <div className="flex-1 flex justify-between text-[10px] text-muted-foreground">
-          <span>← below median</span>
+          <span className="hidden sm:inline">← below median</span>
           <span className="font-medium text-foreground/70">
             median = {median}
             {unit}
           </span>
-          <span>above median →</span>
+          <span className="hidden sm:inline">above median →</span>
         </div>
-        <div className="w-16 shrink-0" />
+        <div className="hidden sm:block w-16 shrink-0" />
       </div>
       {sorted.map((r) => {
         const isYou = r.companyId === focusId;
@@ -55,7 +55,7 @@ export function GapToMedianBars({
           <div key={r.companyId} className={cn("flex items-center gap-2.5", dimmed)}>
             <div
               className={cn(
-                "w-40 shrink-0 text-xs truncate",
+                "w-24 shrink-0 sm:w-40 text-xs truncate",
                 isYou ? "font-bold text-primary" : "text-foreground/80"
               )}
             >
@@ -92,7 +92,7 @@ export function GapToMedianBars({
               {val}
               {unit}
             </div>
-            <div className="w-16 text-right shrink-0">
+            <div className="hidden sm:block w-16 text-right shrink-0">
               {gap === 0 ? (
                 <span className="text-xs text-muted-foreground">= median</span>
               ) : gap > 0 ? (
