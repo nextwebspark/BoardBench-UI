@@ -109,6 +109,8 @@ export interface Database {
           profit_net: Json;
           market_capitalisation: Json | null;
           employees: Json | null;
+          revenue_band_label: string | null;
+          employee_band_label: string | null;
           source_document_url: string | null;
           source_system: string;
           extraction_run_id: string | null;

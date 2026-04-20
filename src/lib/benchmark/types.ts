@@ -45,6 +45,25 @@ export interface FilterState {
   empMax: number | null;
 }
 
+export interface PeerPanelCompany {
+  id: number;
+  name: string;
+  code: string | null;
+  country: string | null;
+  exchange: string | null;
+  sector: string | null;
+  subSector: string | null;
+}
+
+export interface PeerPanelFilterState {
+  sectors: Set<string>;
+  subSectors: Set<string>;
+  countries: Set<string>;
+  exchanges: Set<string>;
+  revenueBands: Set<string>;
+  employeeBands: Set<string>;
+}
+
 export interface BenchmarkPool {
   focus: CompanyMetrics;
   allPeers: CompanyMetrics[];

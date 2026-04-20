@@ -93,6 +93,24 @@ export async function listCompanies(
   }));
 }
 
+export async function listCompaniesWithSubSector(
+  supabase: SupabaseClient<Database>
+): Promise<import("./types").PeerPanelCompany[]> {
+  const { data } = await supabase
+    .from("companies")
+    .select("id, company_name_value, company_code, country_value, sector_value, sub_sector_value, exchange_value")
+    .order("company_name_value");
+  return (data ?? []).map((c) => ({
+    id: c.id,
+    name: c.company_name_value,
+    code: c.company_code,
+    country: c.country_value,
+    exchange: c.exchange_value,
+    sector: c.sector_value,
+    subSector: c.sub_sector_value,
+  }));
+}
+
 export async function availableYearsFor(
   supabase: SupabaseClient<Database>,
   companyIds: number[]

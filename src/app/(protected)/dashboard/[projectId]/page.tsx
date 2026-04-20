@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { TopBar } from "@/components/layout/TopBar";
 import { DashboardClient } from "./DashboardClient";
-import { fetchBoardMetrics, availableYearsFor } from "@/lib/benchmark/fetch";
+import { fetchBoardMetrics, availableYearsFor, listCompaniesWithSubSector } from "@/lib/benchmark/fetch";
 import type { Project } from "@/types/database.types";
 
 interface PageProps {
@@ -47,9 +47,10 @@ export default async function DashboardPage({ params }: PageProps) {
     project.benchmark_year ?? null;
 
   // Run years lookup and an optimistic metrics fetch in parallel when we already know the year
-  const [years, optimisticMetrics] = await Promise.all([
+  const [years, optimisticMetrics, allCompanies] = await Promise.all([
     availableYearsFor(supabase, allIds),
     targetYear ? fetchBoardMetrics(supabase, allIds, targetYear) : Promise.resolve(null),
+    listCompaniesWithSubSector(supabase),
   ]);
 
   const year =
@@ -84,7 +85,7 @@ export default async function DashboardPage({ params }: PageProps) {
   return (
     <>
       <TopBar title={project.name} />
-      <DashboardClient focus={focus} peers={peers} year={year} />
+      <DashboardClient focus={focus} peers={peers} year={year} projectId={project.id} allCompanies={allCompanies} />
     </>
   );
 }
