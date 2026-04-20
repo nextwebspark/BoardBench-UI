@@ -64,7 +64,7 @@ export function DiversityScreen({ pool }: { pool: BenchmarkPool }) {
         subtitle={`Screen 1.6 · Gender · Nationality · Age profile · N = ${filteredPeers.length} peers`}
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <DimensionCard
           label="Gender — women"
           value={focus.womenPct}
@@ -104,6 +104,7 @@ export function DiversityScreen({ pool }: { pool: BenchmarkPool }) {
           <CardTitle className="text-sm font-semibold">Peer group — gender ranking</CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
+          <div className="min-w-[480px]">
           <Table>
             <TableHeader>
               <TableRow>
@@ -156,6 +157,7 @@ export function DiversityScreen({ pool }: { pool: BenchmarkPool }) {
               })}
             </TableBody>
           </Table>
+          </div>
         </CardContent>
       </Card>
 

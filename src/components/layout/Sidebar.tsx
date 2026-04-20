@@ -17,7 +17,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="group/sidebar absolute left-0 top-0 z-20 flex h-full w-14 hover:w-56 flex-col border-r bg-sidebar border-sidebar-border transition-[width] duration-200 overflow-hidden">
+    <aside className="group/sidebar hidden lg:flex absolute left-0 top-0 z-20 h-full w-14 hover:w-56 flex-col border-r bg-sidebar border-sidebar-border transition-[width] duration-200 overflow-hidden">
       <nav className="flex-1 px-2 py-3 space-y-0.5">
         {navItems.map(({ href, label, icon: Icon }) => (
           <Link

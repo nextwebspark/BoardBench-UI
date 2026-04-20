@@ -72,7 +72,7 @@ export function IndependenceScreen({ pool }: { pool: BenchmarkPool }) {
         subtitle={`Screen 1.2 · Benchmarking & governance compliance · ${focus.year ?? "—"}`}
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <DimensionCard
           label="Independence"
           value={focus.indPct}
@@ -107,7 +107,7 @@ export function IndependenceScreen({ pool }: { pool: BenchmarkPool }) {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold">Board composition</CardTitle>
@@ -149,6 +149,7 @@ export function IndependenceScreen({ pool }: { pool: BenchmarkPool }) {
             <CardTitle className="text-sm font-semibold">Peer group comparison</CardTitle>
           </CardHeader>
           <CardContent className="overflow-x-auto">
+            <div className="min-w-[420px]">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -191,6 +192,7 @@ export function IndependenceScreen({ pool }: { pool: BenchmarkPool }) {
                 })}
               </TableBody>
             </Table>
+            </div>
           </CardContent>
         </Card>
       </div>

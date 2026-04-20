@@ -36,12 +36,12 @@ export function DimensionCard({
     <Card>
       <CardContent className="p-4 space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-muted-foreground truncate">
             {label}
           </span>
           <PercentileBadge pct={pct} />
         </div>
-        <div className="text-2xl font-bold tabular-nums">
+        <div className="text-xl sm:text-2xl font-bold tabular-nums">
           {value != null ? `${value}${unit}` : "—"}
         </div>
         <div className="text-[11px] text-muted-foreground">{note}</div>

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { FolderKanban } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { UserMenu } from "./UserMenu";
 import { useNavigation } from "@/lib/navigation/context";
@@ -33,6 +34,14 @@ export function LayoutHeader() {
             S
           </div>
           <span className="font-semibold text-sm">SeatRight</span>
+        </Link>
+        {/* Mobile nav — Projects link, hidden on desktop where sidebar handles it */}
+        <Link
+          href="/projects"
+          className="lg:hidden ml-3 flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+        >
+          <FolderKanban className="h-3.5 w-3.5" />
+          Projects
         </Link>
         <div className="flex items-center gap-1">
           {pending && (

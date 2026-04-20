@@ -49,6 +49,7 @@ export function PeerManagementPanel({
     () => (focusSector ? new Set([focusSector]) : new Set())
   );
   const [saving, setSaving] = useState(false);
+  const [filtersVisible, setFiltersVisible] = useState(false);
 
   const factsForYear = useFactsForYear(year);
 
@@ -179,9 +180,24 @@ export function PeerManagementPanel({
 
   return (
     <div className="border-b bg-card shadow-sm animate-in slide-in-from-top-1 duration-200">
-      <div className="flex h-[480px] divide-x divide-border">
+      {/* Mobile filter toggle — hidden on lg+ */}
+      <div className="flex items-center justify-between border-b px-4 py-2 lg:hidden">
+        <p className="text-xs font-medium text-muted-foreground">Peer filters</p>
+        <button
+          type="button"
+          onClick={() => setFiltersVisible((v) => !v)}
+          className="text-xs text-primary font-medium"
+        >
+          {filtersVisible ? "Hide filters" : "Show filters"}
+        </button>
+      </div>
+      <div className="flex flex-col lg:flex-row lg:h-[480px] lg:divide-x divide-border max-h-[70vh] lg:max-h-none overflow-hidden">
         {/* LEFT: filters */}
-        <div className="w-64 shrink-0 flex flex-col">
+        <div className={cn(
+          "flex flex-col lg:w-64 lg:shrink-0",
+          filtersVisible ? "max-h-[40vh] overflow-y-auto border-b" : "hidden",
+          "lg:flex lg:max-h-none lg:overflow-visible lg:border-b-0"
+        )}>
           {/* sticky header */}
           <div className="flex items-center justify-between border-b px-4 py-2.5 bg-card shrink-0">
             <p className="text-[11px] text-muted-foreground">
@@ -300,7 +316,7 @@ export function PeerManagementPanel({
         </div>
 
         {/* RIGHT: company list */}
-        <div className="flex flex-1 flex-col overflow-hidden">
+        <div className="flex flex-1 flex-col overflow-hidden min-h-0">
           <div className="border-b p-3 space-y-1.5">
             <div className="relative">
               <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -364,7 +380,7 @@ export function PeerManagementPanel({
             )}
           </div>
 
-          <div className="flex items-center justify-end gap-2 border-t p-3">
+          <div className="flex items-center justify-end gap-2 border-t p-3 shrink-0">
             <Button variant="outline" size="sm" onClick={onClose} disabled={saving}>
               Cancel
             </Button>

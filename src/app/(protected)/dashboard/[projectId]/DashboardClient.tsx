@@ -35,6 +35,7 @@ export function DashboardClient({ focus, peers, year, projectId, allCompanies }:
   const [active, setActive] = useState<BenchmarkScreenId>("1.1");
   const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
   const [peerPanelOpen, setPeerPanelOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   function handlePeersSaved() {
     setPeerPanelOpen(false);
@@ -53,8 +54,17 @@ export function DashboardClient({ focus, peers, year, projectId, allCompanies }:
   }, [focus, peers, filters]);
 
   return (
-    <div className="flex flex-1 overflow-hidden">
-      <BenchmarkSidebar active={active} onChange={setActive} />
+    <div className="relative flex flex-1 overflow-hidden">
+      {/* Mobile overlay backdrop */}
+      <div
+        className={`fixed inset-0 z-30 bg-black/40 lg:hidden transition-opacity duration-200 ${sidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+        onClick={() => setSidebarOpen(false)}
+      />
+      <BenchmarkSidebar
+        active={active}
+        onChange={(id) => { setActive(id); setSidebarOpen(false); }}
+        mobileOpen={sidebarOpen}
+      />
       <div className="flex flex-1 flex-col overflow-hidden">
         <BenchmarkFilterBar
           filters={filters}
@@ -66,6 +76,7 @@ export function DashboardClient({ focus, peers, year, projectId, allCompanies }:
           year={year}
           onEditPeers={() => setPeerPanelOpen((v) => !v)}
           peerPanelOpen={peerPanelOpen}
+          onMenuOpen={() => setSidebarOpen((v) => !v)}
         />
 
         {peerPanelOpen && (
@@ -79,7 +90,7 @@ export function DashboardClient({ focus, peers, year, projectId, allCompanies }:
             onClose={() => setPeerPanelOpen(false)}
           />
         )}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-3 lg:p-6">
           {active === "1.1" && <BoardSizeScreen pool={pool} />}
           {active === "1.2" && <IndependenceScreen pool={pool} />}
           {active === "1.6" && <DiversityScreen pool={pool} />}

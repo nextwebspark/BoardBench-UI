@@ -26,7 +26,7 @@ export default async function ProtectedLayout({
         <LayoutHeader />
         <div className="relative flex flex-1 overflow-hidden">
           <Sidebar />
-          <main className="flex flex-col flex-1 overflow-y-auto min-w-0 pl-14">
+          <main className="flex flex-col flex-1 overflow-y-auto min-w-0 pl-0 lg:pl-14">
             {children}
           </main>
         </div>

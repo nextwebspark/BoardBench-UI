@@ -23,10 +23,12 @@ export function GaugeBar({ label, value, distribution, unit = "" }: GaugeBarProp
 
   if (valueMissing) {
     return (
-      <div className="flex items-center gap-3 py-2 border-b last:border-b-0 text-sm text-muted-foreground">
-        <div className="w-40 shrink-0 text-foreground font-medium">{label}</div>
-        <div className="flex-1 italic">No data</div>
-        <PercentileBadge pct={null} />
+      <div className="flex flex-col gap-1 py-2 border-b last:border-b-0 text-sm text-muted-foreground sm:flex-row sm:items-center sm:gap-3">
+        <div className="sm:w-40 sm:shrink-0 text-foreground font-medium text-xs">{label}</div>
+        <div className="flex items-center justify-between sm:flex-1 sm:justify-start gap-2">
+          <span className="italic">No data</span>
+          <PercentileBadge pct={null} />
+        </div>
       </div>
     );
   }
@@ -41,11 +43,11 @@ export function GaugeBar({ label, value, distribution, unit = "" }: GaugeBarProp
   const deltaStr = (delta >= 0 ? "+" : "") + delta + unit;
 
   return (
-    <div className="flex items-center gap-3 py-3 border-b last:border-b-0">
-      <div className="w-40 shrink-0 text-xs font-medium text-foreground/80 leading-tight">
+    <div className="flex flex-col gap-1.5 py-3 border-b last:border-b-0 sm:flex-row sm:items-center sm:gap-3">
+      <div className="sm:w-40 sm:shrink-0 text-xs font-medium text-foreground/80 leading-tight">
         {label}
       </div>
-      <div className="flex-1 relative pt-6 pb-5">
+      <div className="flex-1 relative pt-6 pb-1 sm:pb-5">
         <div
           className="absolute top-0 text-[10px] font-bold whitespace-nowrap rounded px-1 py-px bg-primary/10 text-primary border border-primary/20"
           style={{ left: `${youPct}%`, transform: "translateX(-50%)" }}
@@ -74,7 +76,7 @@ export function GaugeBar({ label, value, distribution, unit = "" }: GaugeBarProp
             style={{ left: `${youPct}%`, transform: "translate(-50%, -50%)" }}
           />
         </div>
-        <div className="absolute bottom-0 left-0 right-0 text-[9px] text-muted-foreground">
+        <div className="hidden sm:block absolute bottom-0 left-0 right-0 text-[9px] text-muted-foreground">
           <span className="absolute" style={{ left: `${p10Pct}%`, transform: "translateX(-50%)" }}>
             P10
           </span>
@@ -90,7 +92,7 @@ export function GaugeBar({ label, value, distribution, unit = "" }: GaugeBarProp
           </span>
         </div>
       </div>
-      <div className="w-28 shrink-0 flex items-center justify-end gap-1.5">
+      <div className="flex items-center justify-between sm:justify-end sm:w-28 sm:shrink-0 gap-1.5">
         <span className="text-sm font-semibold tabular-nums">
           {value}
           {unit}

@@ -1,6 +1,6 @@
 "use client";
 
-import { Users } from "lucide-react";
+import { Users, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { FilterState } from "@/lib/benchmark/types";
 
@@ -14,6 +14,7 @@ interface BenchmarkFilterBarProps {
   year: number;
   onEditPeers: () => void;
   peerPanelOpen: boolean;
+  onMenuOpen: () => void;
 }
 
 export function BenchmarkFilterBar({
@@ -22,10 +23,19 @@ export function BenchmarkFilterBar({
   year,
   onEditPeers,
   peerPanelOpen,
+  onMenuOpen,
 }: BenchmarkFilterBarProps) {
   return (
-    <div className="flex items-center gap-2 border-b bg-card px-6 py-2 text-xs overflow-x-auto">
-      <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+    <div className="flex items-center gap-2 border-b bg-card px-3 lg:px-6 py-2 text-xs overflow-x-auto">
+      <button
+        type="button"
+        onClick={onMenuOpen}
+        className="lg:hidden shrink-0 rounded-md p-1.5 hover:bg-muted"
+        aria-label="Open navigation"
+      >
+        <Menu className="h-4 w-4" />
+      </button>
+      <span className="hidden sm:inline shrink-0 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
         Benchmark
       </span>
       <StaticChip label={String(year)} />
@@ -42,7 +52,7 @@ export function BenchmarkFilterBar({
         <Users className="h-3 w-3" />
         {peerPanelOpen ? "Close peers" : "Edit peers"}
       </button>
-      <div className="ml-auto shrink-0 text-[11px] font-medium">
+      <div className="ml-auto shrink-0 text-[10px] lg:text-[11px] font-medium">
         {fallback ? (
           <span className="text-amber-600 dark:text-amber-400">
             ⚠ {poolCount} peers match — using full-universe benchmark
