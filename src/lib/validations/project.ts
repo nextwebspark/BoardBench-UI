@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const PEER_MIN = 3;
-export const PEER_MAX = 10;
+export const PEER_MAX = 1000;
 
 export const createProjectSchema = z.object({
   name: z
