@@ -18,7 +18,8 @@ export async function GET() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[GET /api/projects]", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 
   return NextResponse.json(data);
@@ -51,7 +52,8 @@ export async function POST(request: Request) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[POST /api/projects]", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 
   return NextResponse.json(data, { status: 201 });
