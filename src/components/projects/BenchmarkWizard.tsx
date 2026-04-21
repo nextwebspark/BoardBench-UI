@@ -12,8 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { Company } from "@/types/database.types";
-
-const MIN_PEERS = 3;
+import { PEER_MIN as MIN_PEERS, PEER_MAX as MAX_PEERS } from "@/lib/validations/project";
 
 function numFromJson(json: unknown): number | null {
   if (json == null) return null;
@@ -169,7 +168,8 @@ export function BenchmarkWizard() {
   function addAll(list: Company[]) {
     setPeers((prev) => {
       const existingIds = new Set(prev.map((p) => Number(p.id)));
-      return [...prev, ...list.filter((c) => !existingIds.has(Number(c.id)))];
+      const toAdd = list.filter((c) => !existingIds.has(Number(c.id)));
+      return [...prev, ...toAdd].slice(0, MAX_PEERS);
     });
   }
 
@@ -183,13 +183,13 @@ export function BenchmarkWizard() {
   function togglePeer(c: Company) {
     if (peers.some((p) => Number(p.id) === Number(c.id))) {
       setPeers((prev) => prev.filter((p) => Number(p.id) !== Number(c.id)));
-    } else {
+    } else if (peers.length < MAX_PEERS) {
       setPeers((prev) => [...prev, c]);
     }
   }
 
   const canSubmit =
-    !!focus && peers.length >= MIN_PEERS && !!effectiveYear && name.trim().length > 0;
+    !!focus && peers.length >= MIN_PEERS && peers.length <= MAX_PEERS && !!effectiveYear && name.trim().length > 0;
 
   async function handleSubmit() {
     if (!focus || !effectiveYear || submitting) return;
@@ -294,7 +294,7 @@ export function BenchmarkWizard() {
                 peers.length >= MIN_PEERS ? "text-primary font-medium" : "text-muted-foreground"
               )}
             >
-              {peers.length} selected · min {MIN_PEERS}
+              {peers.length} selected · min {MIN_PEERS} · max {MAX_PEERS}
             </span>
           }
         />

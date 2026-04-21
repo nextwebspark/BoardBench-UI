@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useFactsForYear } from "@/lib/data-cache/context";
 import type { PeerPanelCompany, PeerPanelFilterState } from "@/lib/benchmark/types";
+import { PEER_MIN, PEER_MAX } from "@/lib/validations/project";
 
 interface PeerManagementPanelProps {
   projectId: string;
@@ -162,6 +163,14 @@ export function PeerManagementPanel({
   }
 
   async function handleSave() {
+    if (draftIds.size < PEER_MIN) {
+      toast.error(`Select at least ${PEER_MIN} peers before saving.`);
+      return;
+    }
+    if (draftIds.size > PEER_MAX) {
+      toast.error(`Too many peers selected. Maximum is ${PEER_MAX} (currently ${draftIds.size}).`);
+      return;
+    }
     setSaving(true);
     try {
       const res = await fetch(`/api/projects/${projectId}`, {
@@ -169,10 +178,14 @@ export function PeerManagementPanel({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ peer_company_ids: Array.from(draftIds) }),
       });
-      if (!res.ok) throw new Error(await res.text());
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        const peerError = body?.error?.peer_company_ids?.[0];
+        throw new Error(peerError ?? "Failed to save peers. Please try again.");
+      }
       onSaved();
-    } catch {
-      toast.error("Failed to save peers. Please try again.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save peers. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -380,13 +393,27 @@ export function PeerManagementPanel({
             )}
           </div>
 
-          <div className="flex items-center justify-end gap-2 border-t p-3 shrink-0">
-            <Button variant="outline" size="sm" onClick={onClose} disabled={saving}>
-              Cancel
-            </Button>
-            <Button size="sm" onClick={handleSave} disabled={saving || draftIds.size < 3}>
-              {saving ? "Saving…" : `Save peers (${draftIds.size})`}
-            </Button>
+          <div className="flex items-center justify-between gap-2 border-t p-3 shrink-0">
+            <p className={cn(
+              "text-xs",
+              draftIds.size < PEER_MIN || draftIds.size > PEER_MAX
+                ? "text-destructive font-medium"
+                : "text-muted-foreground"
+            )}>
+              {draftIds.size < PEER_MIN
+                ? `Need at least ${PEER_MIN} peers (${draftIds.size} selected)`
+                : draftIds.size > PEER_MAX
+                ? `Max ${PEER_MAX} peers exceeded (${draftIds.size} selected)`
+                : `${draftIds.size} selected · min ${PEER_MIN} · max ${PEER_MAX}`}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={onClose} disabled={saving}>
+                Cancel
+              </Button>
+              <Button size="sm" onClick={handleSave} disabled={saving || draftIds.size < PEER_MIN || draftIds.size > PEER_MAX}>
+                {saving ? "Saving…" : `Save peers (${draftIds.size})`}
+              </Button>
+            </div>
           </div>
         </div>
       </div>

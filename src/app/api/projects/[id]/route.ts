@@ -35,7 +35,8 @@ export async function PATCH(
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[PATCH /api/projects/:id]", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 
   return NextResponse.json(data);
@@ -63,7 +64,8 @@ export async function DELETE(
     .eq("user_id", user.id);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[DELETE /api/projects/:id]", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 
   return new NextResponse(null, { status: 204 });
