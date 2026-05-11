@@ -72,13 +72,13 @@ function verdictFor(score: number): { label: string; tone: string; blurb: string
 export function CompositionScoreScreen({ pool }: { pool: BenchmarkPool }) {
   const { focus, filteredPeers, distributions } = pool;
 
-  const { score: focusScore, parts: focusParts } = useMemo(
-    () => computeCompositeForCompany(focus, distributions),
+  const focusComposite = useMemo(
+    () => (focus ? computeCompositeForCompany(focus, distributions) : null),
     [focus, distributions]
   );
 
   const ranked = useMemo(() => {
-    const rows = [focus, ...filteredPeers].map((r) => ({
+    const rows = (focus ? [focus, ...filteredPeers] : filteredPeers).map((r) => ({
       row: r,
       composite: computeCompositeForCompany(r, distributions),
     }));
@@ -86,27 +86,33 @@ export function CompositionScoreScreen({ pool }: { pool: BenchmarkPool }) {
     return rows;
   }, [focus, filteredPeers, distributions]);
 
-  const focusRank = ranked.findIndex((r) => r.row.companyId === focus.companyId) + 1;
+  const focusRank = focus
+    ? ranked.findIndex((r) => r.row.companyId === focus.companyId) + 1
+    : null;
   const totalRanked = ranked.filter((r) => r.composite.score != null).length;
 
+  const focusScore = focusComposite?.score ?? null;
+  const focusParts = focusComposite?.parts ?? [];
   const verdict = focusScore != null ? verdictFor(focusScore) : null;
 
-  const priorityActions: Insight[] = focusParts
-    .filter((p) => p.pct && p.pct.band === "below")
-    .sort((a, b) => (a.pct?.n ?? 0) - (b.pct?.n ?? 0))
-    .slice(0, 3)
-    .map((p) => ({
-      tone: "negative" as const,
-      text: (
-        <>
-          <strong>{p.dim.label}</strong> at P{p.pct?.n ?? "—"} — weighted{" "}
-          {(p.dim.weight * 100).toFixed(0)}% of the composite. Moving this to peer median yields
-          the largest score uplift.
-        </>
-      ),
-    }));
+  const priorityActions: Insight[] = focus
+    ? focusParts
+        .filter((p) => p.pct && p.pct.band === "below")
+        .sort((a, b) => (a.pct?.n ?? 0) - (b.pct?.n ?? 0))
+        .slice(0, 3)
+        .map((p) => ({
+          tone: "negative" as const,
+          text: (
+            <>
+              <strong>{p.dim.label}</strong> at P{p.pct?.n ?? "—"} — weighted{" "}
+              {(p.dim.weight * 100).toFixed(0)}% of the composite. Moving this to peer median yields
+              the largest score uplift.
+            </>
+          ),
+        }))
+    : [];
 
-  if (priorityActions.length === 0) {
+  if (focus && priorityActions.length === 0) {
     priorityActions.push({
       tone: "positive",
       text: (
@@ -125,84 +131,87 @@ export function CompositionScoreScreen({ pool }: { pool: BenchmarkPool }) {
         subtitle={`Screen 1.11 · Weighted composite percentile score · N = ${filteredPeers.length} peers`}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-5">
+      {focus ? (
+        <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-5">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-semibold">Your composite score</CardTitle>
+              <p className="text-xs text-muted-foreground">
+                Weighted average of percentile ranks across six dimensions
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-6">
+                <div className="relative h-32 w-32 rounded-full border-8 border-muted flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold tabular-nums">{focusScore ?? "—"}</div>
+                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">P-score</div>
+                  </div>
+                </div>
+                <div className="flex-1 space-y-2">
+                  {verdict && (
+                    <span className={cn("inline-block rounded-full px-3 py-1 text-xs font-semibold", verdict.tone)}>
+                      {verdict.label}
+                    </span>
+                  )}
+                  <p className="text-sm text-muted-foreground">{verdict?.blurb ?? "Insufficient data."}</p>
+                  {totalRanked > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      Rank <strong className="text-foreground">{focusRank}</strong> of {totalRanked} companies
+                      in filtered pool.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-semibold">Dimension breakdown</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {focusParts.map(({ dim, pct }) => {
+                const barW = pct ? pct.n : 0;
+                const tone =
+                  pct?.band === "above" ? "bg-emerald-500" : pct?.band === "below" ? "bg-rose-500" : "bg-sky-500";
+                return (
+                  <div key={dim.key} className="text-xs">
+                    <div className="flex justify-between mb-1">
+                      <span className="font-medium">
+                        {dim.label}{" "}
+                        <span className="text-muted-foreground">({(dim.weight * 100).toFixed(0)}%)</span>
+                      </span>
+                      <span className="tabular-nums">
+                        {focus[dim.key] != null ? `${focus[dim.key]}${dim.unit ?? ""}` : "—"}
+                        {pct && <span className="ml-1 text-muted-foreground">· P{pct.n}</span>}
+                      </span>
+                    </div>
+                    <div className="relative h-1.5 bg-muted rounded">
+                      <div className={cn("absolute left-0 top-0 h-full rounded", tone)} style={{ width: `${barW}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+        </div>
+      ) : (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold">Your composite score</CardTitle>
+            <CardTitle className="text-sm font-semibold">Market overview</CardTitle>
             <p className="text-xs text-muted-foreground">
-              Weighted average of percentile ranks across six dimensions
+              Select a focus company to compute your composite governance score and rank.
             </p>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-6">
-              <div className="relative h-32 w-32 rounded-full border-8 border-muted flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-3xl font-bold tabular-nums">{focusScore ?? "—"}</div>
-                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                    P-score
-                  </div>
-                </div>
-              </div>
-              <div className="flex-1 space-y-2">
-                {verdict && (
-                  <span
-                    className={cn(
-                      "inline-block rounded-full px-3 py-1 text-xs font-semibold",
-                      verdict.tone
-                    )}
-                  >
-                    {verdict.label}
-                  </span>
-                )}
-                <p className="text-sm text-muted-foreground">{verdict?.blurb ?? "Insufficient data."}</p>
-                {totalRanked > 0 && (
-                  <p className="text-xs text-muted-foreground">
-                    Rank <strong className="text-foreground">{focusRank}</strong> of {totalRanked}{" "}
-                    companies in filtered pool.
-                  </p>
-                )}
-              </div>
-            </div>
+            <p className="text-sm text-muted-foreground">
+              The peer ranking below shows composite scores for all {filteredPeers.length} companies
+              in the benchmark. Add a focus company to see your position highlighted.
+            </p>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold">Dimension breakdown</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {focusParts.map(({ dim, pct }) => {
-              const barW = pct ? pct.n : 0;
-              const tone =
-                pct?.band === "above"
-                  ? "bg-emerald-500"
-                  : pct?.band === "below"
-                  ? "bg-rose-500"
-                  : "bg-sky-500";
-              return (
-                <div key={dim.key} className="text-xs">
-                  <div className="flex justify-between mb-1">
-                    <span className="font-medium">
-                      {dim.label}{" "}
-                      <span className="text-muted-foreground">({(dim.weight * 100).toFixed(0)}%)</span>
-                    </span>
-                    <span className="tabular-nums">
-                      {focus[dim.key] != null ? `${focus[dim.key]}${dim.unit ?? ""}` : "—"}
-                      {pct && <span className="ml-1 text-muted-foreground">· P{pct.n}</span>}
-                    </span>
-                  </div>
-                  <div className="relative h-1.5 bg-muted rounded">
-                    <div
-                      className={cn("absolute left-0 top-0 h-full rounded", tone)}
-                      style={{ width: `${barW}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
-      </div>
+      )}
 
       <Card>
         <CardHeader className="pb-2">
@@ -211,7 +220,7 @@ export function CompositionScoreScreen({ pool }: { pool: BenchmarkPool }) {
         <CardContent>
           <ol className="space-y-1.5">
             {ranked.map((r, idx) => {
-              const isYou = r.row.companyId === focus.companyId;
+              const isYou = focus && r.row.companyId === focus.companyId;
               const score = r.composite.score;
               const scoreTone =
                 score == null
@@ -252,17 +261,17 @@ export function CompositionScoreScreen({ pool }: { pool: BenchmarkPool }) {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold">Priority actions</CardTitle>
-          <p className="text-xs text-muted-foreground">
-            Dimensions below P35 — ordered by largest gap
-          </p>
-        </CardHeader>
-        <CardContent>
-          <InsightList items={priorityActions} />
-        </CardContent>
-      </Card>
+      {focus && priorityActions.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-semibold">Priority actions</CardTitle>
+            <p className="text-xs text-muted-foreground">Dimensions below P35 — ordered by largest gap</p>
+          </CardHeader>
+          <CardContent>
+            <InsightList items={priorityActions} />
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

@@ -55,12 +55,12 @@ export function distributionMapFrom(pool: CompanyMetrics[]): DistributionMap {
 
 export function applyFilters(
   peers: CompanyMetrics[],
-  focus: CompanyMetrics,
+  focus: CompanyMetrics | undefined,
   filters: FilterState
 ): CompanyMetrics[] {
   return peers.filter((p) => {
-    if (filters.country && p.country !== focus.country) return false;
-    if (filters.industry && p.industry !== focus.industry) return false;
+    if (focus && filters.country && p.country !== focus.country) return false;
+    if (focus && filters.industry && p.industry !== focus.industry) return false;
     if (filters.capMin !== null && (p.marketCap == null || p.marketCap < filters.capMin)) return false;
     if (filters.capMax !== null && (p.marketCap == null || p.marketCap > filters.capMax)) return false;
     if (filters.empMin !== null && (p.employees == null || p.employees < filters.empMin)) return false;
@@ -70,7 +70,7 @@ export function applyFilters(
 }
 
 export function computePool(
-  focus: CompanyMetrics,
+  focus: CompanyMetrics | undefined,
   allPeers: CompanyMetrics[],
   filters: FilterState
 ) {

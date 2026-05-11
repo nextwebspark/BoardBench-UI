@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, LayoutGrid, List } from "lucide-react";
-import { useNavigation } from "@/lib/navigation/context";
 import { TopBar } from "@/components/layout/TopBar";
 import { ProjectsTable } from "@/components/projects/ProjectsTable";
 import { ProjectsGrid } from "@/components/projects/ProjectsGrid";
 import { EditProjectDialog } from "@/components/projects/EditProjectDialog";
 import { DeleteProjectDialog } from "@/components/projects/DeleteProjectDialog";
+import { ProjectCreationModal } from "@/components/projects/ProjectCreationModal";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useProjects } from "@/hooks/use-projects";
@@ -19,10 +19,17 @@ type View = "cards" | "table";
 export default function ProjectsPage() {
   const { data: projects = [], isLoading } = useProjects();
   const { companies } = useAllCompanies();
-  const { navigateTo } = useNavigation();
   const [view, setView] = useState<View>("cards");
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [deletingProject, setDeletingProject] = useState<Project | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  // Auto-open creation modal when user has no projects
+  useEffect(() => {
+    if (!isLoading && projects.length === 0) {
+      setModalOpen(true);
+    }
+  }, [isLoading, projects.length]);
 
   return (
     <>
@@ -59,7 +66,10 @@ export default function ProjectsPage() {
               </button>
             </div>
 
-            <button onClick={() => navigateTo("/projects/new")} className={cn(buttonVariants({ size: "sm" }))}>
+            <button
+              onClick={() => setModalOpen(true)}
+              className={cn(buttonVariants({ size: "sm" }))}
+            >
               <Plus className="h-4 w-4 mr-1.5" />
               New project
             </button>
@@ -69,7 +79,7 @@ export default function ProjectsPage() {
 
       <div className="flex-1 p-6">
         {!isLoading && projects.length === 0 ? (
-          <EmptyState onNew={() => navigateTo("/projects/new")} />
+          <EmptyState onNew={() => setModalOpen(true)} />
         ) : view === "cards" ? (
           <ProjectsGrid
             data={projects}
@@ -87,6 +97,8 @@ export default function ProjectsPage() {
           />
         )}
       </div>
+
+      <ProjectCreationModal open={modalOpen} onClose={() => setModalOpen(false)} />
 
       <EditProjectDialog
         project={editingProject}

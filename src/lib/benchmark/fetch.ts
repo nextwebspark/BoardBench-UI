@@ -124,6 +124,32 @@ export async function availableYearsFor(
   return years;
 }
 
+export async function allAvailableYears(
+  supabase: SupabaseClient<Database>
+): Promise<number[]> {
+  const { data } = await supabase.from("company_facts").select("year");
+  const years = Array.from(new Set((data ?? []).map((r) => r.year))).sort((a, b) => b - a);
+  return years;
+}
+
+export async function fetchLatestYear(
+  supabase: SupabaseClient<Database>
+): Promise<number> {
+  const years = await allAvailableYears(supabase);
+  return years[0] ?? new Date().getFullYear();
+}
+
+
+export async function fetchAllBoardMetrics(
+  supabase: SupabaseClient<Database>,
+  year: number
+): Promise<CompanyMetrics[]> {
+  const { data: companies } = await supabase.from("companies").select("id");
+  const ids = (companies ?? []).map((c) => c.id);
+  if (!ids.length) return [];
+  return fetchBoardMetrics(supabase, ids, year);
+}
+
 export async function fetchBoardMetrics(
   supabase: SupabaseClient<Database>,
   companyIds: number[],

@@ -76,3 +76,11 @@ export function useFactsForYear(year: number | null): CompanyFactSlim[] {
     return facts.filter((f) => f.year === year);
   }, [facts, year]);
 }
+
+export function useAllAvailableYears(): number[] {
+  const { facts } = useContext(DataCacheContext);
+  return useMemo(() => {
+    const years = facts.map((f) => f.year);
+    return [...new Set(years)].sort((a, b) => b - a);
+  }, [facts]);
+}

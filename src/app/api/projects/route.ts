@@ -15,10 +15,11 @@ export async function GET() {
   const { data, error } = await supabase
     .from("projects")
     .select("*")
+    .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("[GET /api/projects]", error);
+    console.error("GET /api/projects error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 
@@ -52,7 +53,7 @@ export async function POST(request: Request) {
     .single();
 
   if (error) {
-    console.error("[POST /api/projects]", error);
+    console.error("POST /api/projects error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 

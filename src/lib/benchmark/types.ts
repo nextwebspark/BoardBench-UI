@@ -65,7 +65,7 @@ export interface PeerPanelFilterState {
 }
 
 export interface BenchmarkPool {
-  focus: CompanyMetrics;
+  focus?: CompanyMetrics;
   allPeers: CompanyMetrics[];
   filteredPeers: CompanyMetrics[];
   distributions: DistributionMap;

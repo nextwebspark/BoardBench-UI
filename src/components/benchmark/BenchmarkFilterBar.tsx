@@ -15,6 +15,7 @@ interface BenchmarkFilterBarProps {
   onEditPeers: () => void;
   peerPanelOpen: boolean;
   onMenuOpen: () => void;
+  hasFocus?: boolean;
 }
 
 export function BenchmarkFilterBar({
@@ -24,6 +25,7 @@ export function BenchmarkFilterBar({
   onEditPeers,
   peerPanelOpen,
   onMenuOpen,
+  hasFocus,
 }: BenchmarkFilterBarProps) {
   return (
     <div className="flex items-center gap-2 border-b bg-card px-3 lg:px-6 py-2 text-xs overflow-x-auto">
@@ -61,9 +63,13 @@ export function BenchmarkFilterBar({
           <span className="text-rose-600 dark:text-rose-400">
             ⚠ No peers match — remove a filter
           </span>
-        ) : (
+        ) : hasFocus ? (
           <span className="text-primary">
             {poolCount} peer{poolCount === 1 ? "" : "s"} in benchmark
+          </span>
+        ) : (
+          <span className="text-primary">
+            {poolCount} companies · market view
           </span>
         )}
       </div>

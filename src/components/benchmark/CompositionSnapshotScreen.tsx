@@ -29,7 +29,7 @@ function bandClass(band: "below" | "at" | "above" | null) {
 export function CompositionSnapshotScreen({ pool }: { pool: BenchmarkPool }) {
   const { focus, filteredPeers, distributions } = pool;
   const allRows = useMemo<CompanyMetrics[]>(
-    () => [focus, ...filteredPeers],
+    () => (focus ? [focus, ...filteredPeers] : filteredPeers),
     [focus, filteredPeers]
   );
 
@@ -85,100 +85,66 @@ export function CompositionSnapshotScreen({ pool }: { pool: BenchmarkPool }) {
         <p className="px-4 pb-2 text-[10px] text-muted-foreground sm:hidden">← Scroll to see all columns</p>
         <CardContent className="overflow-x-auto p-0 sm:p-6">
           <div className="min-w-[700px]">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>
-                  <button
-                    type="button"
-                    onClick={() => handleSort("name")}
-                    className="inline-flex items-center text-xs font-semibold"
-                  >
-                    Company <SortArrow col="name" />
-                  </button>
-                </TableHead>
-                <TableHead>
-                  <button
-                    type="button"
-                    onClick={() => handleSort("country")}
-                    className="inline-flex items-center text-xs font-semibold"
-                  >
-                    Country <SortArrow col="country" />
-                  </button>
-                </TableHead>
-                <TableHead>
-                  <button
-                    type="button"
-                    onClick={() => handleSort("industry")}
-                    className="inline-flex items-center text-xs font-semibold"
-                  >
-                    Industry <SortArrow col="industry" />
-                  </button>
-                </TableHead>
-                {METRIC_COLUMNS.map((c) => (
-                  <TableHead key={c.key} className="text-right">
-                    <button
-                      type="button"
-                      onClick={() => handleSort(c.key)}
-                      className="inline-flex items-center text-xs font-semibold"
-                    >
-                      {c.label}
-                      <SortArrow col={c.key} />
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>
+                    <button type="button" onClick={() => handleSort("name")} className="inline-flex items-center text-xs font-semibold">
+                      Company <SortArrow col="name" />
                     </button>
                   </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sorted.map((r) => {
-                const isYou = r.companyId === focus.companyId;
-                return (
-                  <TableRow
-                    key={r.companyId}
-                    className={cn(isYou && "bg-primary/10 font-semibold")}
-                  >
-                    <TableCell>
-                      {r.name}
-                      {isYou && (
-                        <span className="ml-1.5 rounded-sm bg-primary px-1 py-0.5 text-[9px] text-primary-foreground align-middle">
-                          You
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      {r.country ?? "—"}
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      {r.industry ?? "—"}
-                    </TableCell>
-                    {METRIC_COLUMNS.map((c) => {
-                      const val = r[c.key];
-                      const pct = calcPercentile(val, distributions[c.key]);
-                      return (
-                        <TableCell key={c.key} className="text-right tabular-nums p-1">
-                          <span
-                            className={cn(
-                              "inline-flex items-center justify-end gap-1 rounded px-2 py-1 min-w-[64px] text-xs",
-                              bandClass(pct?.band ?? null)
-                            )}
-                          >
-                            <span className="font-semibold">
-                              {val != null ? `${val}${c.unit ?? ""}` : "—"}
-                            </span>
-                            {pct && (
-                              <span className="text-[10px] opacity-70">
-                                P{pct.n}
-                              </span>
-                            )}
+                  <TableHead>
+                    <button type="button" onClick={() => handleSort("country")} className="inline-flex items-center text-xs font-semibold">
+                      Country <SortArrow col="country" />
+                    </button>
+                  </TableHead>
+                  <TableHead>
+                    <button type="button" onClick={() => handleSort("industry")} className="inline-flex items-center text-xs font-semibold">
+                      Industry <SortArrow col="industry" />
+                    </button>
+                  </TableHead>
+                  {METRIC_COLUMNS.map((c) => (
+                    <TableHead key={c.key} className="text-right">
+                      <button type="button" onClick={() => handleSort(c.key)} className="inline-flex items-center text-xs font-semibold">
+                        {c.label}
+                        <SortArrow col={c.key} />
+                      </button>
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sorted.map((r) => {
+                  const isYou = focus && r.companyId === focus.companyId;
+                  return (
+                    <TableRow key={r.companyId} className={cn(isYou && "bg-primary/10 font-semibold")}>
+                      <TableCell>
+                        {r.name}
+                        {isYou && (
+                          <span className="ml-1.5 rounded-sm bg-primary px-1 py-0.5 text-[9px] text-primary-foreground align-middle">
+                            You
                           </span>
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{r.country ?? "—"}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{r.industry ?? "—"}</TableCell>
+                      {METRIC_COLUMNS.map((c) => {
+                        const val = r[c.key];
+                        const pct = calcPercentile(val, distributions[c.key]);
+                        return (
+                          <TableCell key={c.key} className="text-right tabular-nums p-1">
+                            <span className={cn("inline-flex items-center justify-end gap-1 rounded px-2 py-1 min-w-[64px] text-xs", bandClass(pct?.band ?? null))}>
+                              <span className="font-semibold">{val != null ? `${val}${c.unit ?? ""}` : "—"}</span>
+                              {pct && <span className="text-[10px] opacity-70">P{pct.n}</span>}
+                            </span>
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
           </div>
         </CardContent>
       </Card>

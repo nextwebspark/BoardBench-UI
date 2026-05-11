@@ -3,7 +3,7 @@ import type { CompanyMetrics } from "@/lib/benchmark/types";
 
 interface GapToMedianBarsProps {
   rows: CompanyMetrics[];
-  focusId: number;
+  focusId: number | null;
   filteredPeerIds: Set<number>;
   valueKey: keyof Pick<
     CompanyMetrics,
