@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Building2 } from "lucide-react";
 import { computePool } from "@/lib/benchmark/percentiles";
 import type { CompanyMetrics, FilterState, BenchmarkPool, PeerPanelCompany } from "@/lib/benchmark/types";
 import { BenchmarkSidebar, type BenchmarkScreenId } from "@/components/benchmark/BenchmarkSidebar";
@@ -14,11 +15,12 @@ import { CompositionSnapshotScreen } from "@/components/benchmark/CompositionSna
 import { CompositionScoreScreen } from "@/components/benchmark/CompositionScoreScreen";
 
 interface DashboardClientProps {
-  focus: CompanyMetrics;
+  focus?: CompanyMetrics;
   peers: CompanyMetrics[];
   year: number;
   projectId: string;
   allCompanies: PeerPanelCompany[];
+  region: string;
 }
 
 const INITIAL_FILTERS: FilterState = {
@@ -30,7 +32,7 @@ const INITIAL_FILTERS: FilterState = {
   empMax: null,
 };
 
-export function DashboardClient({ focus, peers, year, projectId, allCompanies }: DashboardClientProps) {
+export function DashboardClient({ focus, peers, year, projectId, allCompanies, region }: DashboardClientProps) {
   const router = useRouter();
   const [active, setActive] = useState<BenchmarkScreenId>("1.1");
   const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
@@ -69,22 +71,32 @@ export function DashboardClient({ focus, peers, year, projectId, allCompanies }:
         <BenchmarkFilterBar
           filters={filters}
           onChange={setFilters}
-          focusCountry={focus.country}
-          focusIndustry={focus.industry}
+          focusCountry={focus?.country ?? null}
+          focusIndustry={focus?.industry ?? null}
           poolCount={pool.filteredPeers.length}
           fallback={pool.fallback}
           year={year}
           onEditPeers={() => setPeerPanelOpen((v) => !v)}
           peerPanelOpen={peerPanelOpen}
           onMenuOpen={() => setSidebarOpen((v) => !v)}
+          hasFocus={!!focus}
         />
+
+        {!focus && (
+          <div className="flex items-center gap-2.5 border-b bg-amber-50 dark:bg-amber-950/30 px-4 lg:px-6 py-2.5 text-xs text-amber-800 dark:text-amber-300">
+            <Building2 className="h-3.5 w-3.5 shrink-0" />
+            <span>
+              Viewing {region} market benchmarks — no focus company selected. Distributions show the full peer group.
+            </span>
+          </div>
+        )}
 
         {peerPanelOpen && (
           <PeerManagementPanel
             projectId={projectId}
             allCompanies={allCompanies}
             currentPeerIds={peers.map((p) => p.companyId)}
-            focusSector={focus.industry}
+            focusSector={focus?.industry ?? null}
             year={year}
             onSaved={handlePeersSaved}
             onClose={() => setPeerPanelOpen(false)}

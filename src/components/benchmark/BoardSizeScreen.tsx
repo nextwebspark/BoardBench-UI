@@ -16,47 +16,68 @@ export function BoardSizeScreen({ pool }: { pool: BenchmarkPool }) {
   const meetingsDist = distributions.meetings;
   const localDist = distributions.localPct;
 
-  const pBoardSize = calcPercentile(focus.boardSize, boardSizeDist);
-  const pInd = calcPercentile(focus.indPct, indDist);
+  const pBoardSize = focus ? calcPercentile(focus.boardSize, boardSizeDist) : null;
+  const pInd = focus ? calcPercentile(focus.indPct, indDist) : null;
 
   const filteredPeerIds = new Set(filteredPeers.map((p) => p.companyId));
-  const allRows = [focus, ...pool.allPeers];
+  const allRows = focus ? [focus, ...pool.allPeers] : pool.allPeers;
 
-  const insights: Insight[] = [
-    {
-      tone: pBoardSize?.band === "above" ? "positive" : pBoardSize?.band === "below" ? "negative" : "neutral",
-      text: (
-        <>
-          <strong>Board size of {focus.boardSize ?? "—"}</strong> at P{pBoardSize?.n ?? "—"} —{" "}
-          {pBoardSize?.band === "at"
-            ? "within the normal range for your peer pool."
-            : pBoardSize?.band === "above"
-            ? "larger than most peers."
-            : "smaller than most peers."}
-        </>
-      ),
-    },
-    {
-      tone: pInd?.band === "below" ? "negative" : "positive",
-      text: (
-        <>
-          <strong>Independence at {focus.indPct ?? "—"}%</strong> — peer median {indDist.p50}%.{" "}
-          {focus.indPct != null && focus.indPct < indDist.p50
-            ? "Below market. Review non-independent director count."
-            : "At or above market."}
-        </>
-      ),
-    },
-    {
-      tone: "neutral",
-      text: (
-        <>
-          <strong>Meeting cadence ({focus.meetings ?? "—"}/yr)</strong> vs peer median of{" "}
-          {meetingsDist.p50}.
-        </>
-      ),
-    },
-  ];
+  const focusInsights: Insight[] = focus
+    ? [
+        {
+          tone: pBoardSize?.band === "above" ? "positive" : pBoardSize?.band === "below" ? "negative" : "neutral",
+          text: (
+            <>
+              <strong>Board size of {focus.boardSize ?? "—"}</strong> at P{pBoardSize?.n ?? "—"} —{" "}
+              {pBoardSize?.band === "at"
+                ? "within the normal range for your peer pool."
+                : pBoardSize?.band === "above"
+                ? "larger than most peers."
+                : "smaller than most peers."}
+            </>
+          ),
+        },
+        {
+          tone: pInd?.band === "below" ? "negative" : "positive",
+          text: (
+            <>
+              <strong>Independence at {focus.indPct ?? "—"}%</strong> — peer median {indDist.p50}%.{" "}
+              {focus.indPct != null && focus.indPct < indDist.p50
+                ? "Below market. Review non-independent director count."
+                : "At or above market."}
+            </>
+          ),
+        },
+        {
+          tone: "neutral",
+          text: (
+            <>
+              <strong>Meeting cadence ({focus.meetings ?? "—"}/yr)</strong> vs peer median of{" "}
+              {meetingsDist.p50}.
+            </>
+          ),
+        },
+      ]
+    : [
+        {
+          tone: "neutral" as const,
+          text: (
+            <>
+              <strong>Peer-group median board size: {boardSizeDist.p50}</strong> (P25–P75:{" "}
+              {boardSizeDist.p25}–{boardSizeDist.p75}). Select a focus company to see your position.
+            </>
+          ),
+        },
+        {
+          tone: "neutral" as const,
+          text: (
+            <>
+              <strong>Independence median: {indDist.p50}%</strong>. Market range P10–P90:{" "}
+              {indDist.p10}%–{indDist.p90}%.
+            </>
+          ),
+        },
+      ];
 
   return (
     <div className="space-y-5">
@@ -64,7 +85,9 @@ export function BoardSizeScreen({ pool }: { pool: BenchmarkPool }) {
         title="Board size & structure"
         subtitle={
           <>
-            Screen 1.1 · {focus.name} vs {filteredPeers.length} peers · {focus.year ?? "—"}
+            Screen 1.1 ·{" "}
+            {focus ? `${focus.name} vs ` : ""}{filteredPeers.length} peers ·{" "}
+            {focus?.year ?? "—"}
             {fallback && " · (fallback: full-universe benchmark)"}
           </>
         }
@@ -73,32 +96,32 @@ export function BoardSizeScreen({ pool }: { pool: BenchmarkPool }) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <DimensionCard
           label="Board size"
-          value={focus.boardSize}
+          value={focus?.boardSize ?? null}
           unit=""
           dist={boardSizeDist}
           note={`Range: ${boardSizeDist.p10}–${boardSizeDist.p90} directors`}
         />
         <DimensionCard
           label="Independence"
-          value={focus.indPct}
+          value={focus?.indPct ?? null}
           unit="%"
           dist={indDist}
           note={
-            focus.boardSize != null && focus.indPct != null
+            focus?.boardSize != null && focus?.indPct != null
               ? `${Math.round((focus.boardSize * focus.indPct) / 100)} of ${focus.boardSize} independent`
               : "Independent directors"
           }
         />
         <DimensionCard
           label="Meetings / year"
-          value={focus.meetings}
+          value={focus?.meetings ?? null}
           unit=""
           dist={meetingsDist}
           note={`Peer median ${meetingsDist.p50} meetings`}
         />
         <DimensionCard
           label="Local directors"
-          value={focus.localPct}
+          value={focus?.localPct ?? null}
           unit="%"
           dist={localDist}
           note="Nationals on board"
@@ -115,7 +138,7 @@ export function BoardSizeScreen({ pool }: { pool: BenchmarkPool }) {
                   Market position
                 </CardTitle>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Teal dot = you · shaded = P25–P75 · ticks = P10, median, P90
+                  {focus ? "Teal dot = you · " : ""}shaded = P25–P75 · ticks = P10, median, P90
                 </p>
               </div>
               <span className="text-[10px] font-medium text-muted-foreground">
@@ -124,10 +147,10 @@ export function BoardSizeScreen({ pool }: { pool: BenchmarkPool }) {
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-            <GaugeBar label="Total board size" value={focus.boardSize} distribution={boardSizeDist} />
-            <GaugeBar label="Independence (%)" value={focus.indPct} distribution={indDist} unit="%" />
-            <GaugeBar label="Meetings per year" value={focus.meetings} distribution={meetingsDist} />
-            <GaugeBar label="Local directors (%)" value={focus.localPct} distribution={localDist} unit="%" />
+            <GaugeBar label="Total board size" value={focus?.boardSize ?? null} distribution={boardSizeDist} />
+            <GaugeBar label="Independence (%)" value={focus?.indPct ?? null} distribution={indDist} unit="%" />
+            <GaugeBar label="Meetings per year" value={focus?.meetings ?? null} distribution={meetingsDist} />
+            <GaugeBar label="Local directors (%)" value={focus?.localPct ?? null} distribution={localDist} unit="%" />
           </CardContent>
         </Card>
 
@@ -139,7 +162,7 @@ export function BoardSizeScreen({ pool }: { pool: BenchmarkPool }) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <InsightList items={insights} />
+            <InsightList items={focusInsights} />
           </CardContent>
         </Card>
       </div>
@@ -164,7 +187,7 @@ export function BoardSizeScreen({ pool }: { pool: BenchmarkPool }) {
         <CardContent>
           <GapToMedianBars
             rows={allRows}
-            focusId={focus.companyId}
+            focusId={focus?.companyId ?? null}
             filteredPeerIds={filteredPeerIds}
             valueKey="boardSize"
             median={boardSizeDist.p50}
