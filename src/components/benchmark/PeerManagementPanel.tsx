@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useFactsForYear } from "@/lib/data-cache/context";
 import type { PeerPanelCompany, PeerPanelFilterState } from "@/lib/benchmark/types";
-import { PEER_MIN, PEER_MAX } from "@/lib/validations/project";
+const PEER_MIN = 3;
+const PEER_MAX = 1000;
 
 interface PeerManagementPanelProps {
   projectId: string;

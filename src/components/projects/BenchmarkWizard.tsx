@@ -12,7 +12,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { Company } from "@/types/database.types";
-import { PEER_MIN as MIN_PEERS, PEER_MAX as MAX_PEERS } from "@/lib/validations/project";
+const MIN_PEERS = 3;
+const MAX_PEERS = 1000;
 
 function numFromJson(json: unknown): number | null {
   if (json == null) return null;
