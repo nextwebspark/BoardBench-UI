@@ -19,10 +19,14 @@ export default async function DashboardPage({ params }: PageProps) {
   const { projectId } = await params;
   const supabase = await createClient();
 
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) notFound();
+
   const { data: projectData } = await supabase
     .from("projects")
     .select("*")
     .eq("id", projectId)
+    .eq("user_id", user.id)
     .single();
 
   if (!projectData) notFound();

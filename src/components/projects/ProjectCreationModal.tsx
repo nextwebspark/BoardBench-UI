@@ -363,6 +363,7 @@ export function ProjectCreationModal({ open, onClose }: Props) {
               focus={focus}
               focusQuery={focusQuery}
               setFocusQuery={setFocusQuery}
+              clearFocus={() => { setFocus(null); setFocusQuery(""); }}
               focusMatches={focusMatches}
               pickFocus={pickFocus}
               isLoading={isLoading}
@@ -453,6 +454,7 @@ function Step1({
   focus,
   focusQuery,
   setFocusQuery,
+  clearFocus,
   focusMatches,
   pickFocus,
   isLoading,
@@ -460,6 +462,7 @@ function Step1({
   focus: Company | null;
   focusQuery: string;
   setFocusQuery: (q: string) => void;
+  clearFocus: () => void;
   focusMatches: Company[];
   pickFocus: (c: Company) => void;
   isLoading: boolean;
@@ -484,7 +487,7 @@ function Step1({
               {[focus.country_value, focus.sector_value, focus.exchange_value].filter(Boolean).join(" · ")}
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={() => { setFocus(null); setFocusQuery(""); }}>
+          <Button variant="ghost" size="sm" onClick={clearFocus}>
             Change
           </Button>
         </div>
