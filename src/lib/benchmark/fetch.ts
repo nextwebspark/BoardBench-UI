@@ -139,19 +139,6 @@ export async function fetchLatestYear(
   return years[0] ?? new Date().getFullYear();
 }
 
-export async function fetchAllCountryMetrics(
-  supabase: SupabaseClient<Database>,
-  country: string,
-  year: number
-): Promise<CompanyMetrics[]> {
-  const { data: companies } = await supabase
-    .from("companies")
-    .select("id")
-    .eq("country_value", country);
-  const ids = (companies ?? []).map((c) => c.id);
-  if (!ids.length) return [];
-  return fetchBoardMetrics(supabase, ids, year);
-}
 
 export async function fetchAllBoardMetrics(
   supabase: SupabaseClient<Database>,

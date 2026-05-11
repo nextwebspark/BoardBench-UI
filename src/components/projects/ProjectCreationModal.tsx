@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect, useCallback } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Search, X, Check, Building2, Users, PlusCircle, ChevronRight, ChevronLeft, Globe } from "lucide-react";
@@ -484,7 +484,7 @@ function Step1({
               {[focus.country_value, focus.sector_value, focus.exchange_value].filter(Boolean).join(" · ")}
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={() => pickFocus(focus)}>
+          <Button variant="ghost" size="sm" onClick={() => { setFocus(null); setFocusQuery(""); }}>
             Change
           </Button>
         </div>
