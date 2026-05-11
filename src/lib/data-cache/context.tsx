@@ -69,6 +69,14 @@ export function useAvailableYearsFor(companyId: number | null): number[] {
   }, [facts, companyId]);
 }
 
+export function useAllAvailableYears(): number[] {
+  const { facts } = useContext(DataCacheContext);
+  return useMemo(() => {
+    const years = facts.map((f) => f.year);
+    return [...new Set(years)].sort((a, b) => b - a);
+  }, [facts]);
+}
+
 export function useFactsForYear(year: number | null): CompanyFactSlim[] {
   const { facts } = useContext(DataCacheContext);
   return useMemo(() => {
